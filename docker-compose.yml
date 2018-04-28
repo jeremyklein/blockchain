@@ -1,0 +1,14 @@
+node1:
+  build: .
+  ports:
+   - "5000:5000"
+  volumes:
+   - .:/app
+  links:
+   - node2
+node2:
+  build: .
+  ports:
+   - "5001:5000"
+  volumes:
+   - .:/app
