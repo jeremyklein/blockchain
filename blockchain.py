@@ -153,8 +153,8 @@ class Blockchain(object):
         for node in neighbors:
             response = r.get(f'http://{node}/chain')
 
-            length = response.json()[length]
-            chain = response.json()[chain]
+            length = response.json()["length"]
+            chain = response.json()["chain"]
 
         #Replace our chain if one is longer
             if length > max_length & self.valid_chain(chain):
