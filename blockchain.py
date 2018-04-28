@@ -2,11 +2,14 @@ import hashlib
 import json
 from time import time
 from uuid import uuid4
+from urllib.parse import urlparse
+import requests as r
 
 class Blockchain(object):
     def __init__(self):
         self.chain = []
         self.current_transaction = []
+        self.nodes = set()
 
         # Create genesis block
         self.new_block(previous_hash = 1, proof = 100)
@@ -94,7 +97,74 @@ class Blockchain(object):
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000"
 
+    def register_node(self, address):
+        """
+        Add a new node to the list of nodes
 
 
+        :param address: <str> Address of node.
+        :return: None
+        """
+
+        parsed_url = urlparse(address)
+        self.nodes.add(parsed_url.netloc)
+
+    def valid_chain(self,chain):
+        """
+        Determine if given chain is valid
+
+        :param chain:<list> A blockchain
+        :return:<bool> True if valid, false if not
+        """
+
+        last_block = chain[0]
+        current_index = 1
+
+
+        while current_index < len(chain):
+            block = chain[current_index]
+            print(f'{last_block}')
+            print(f'{block}')
+            print("\n-----------\n")
+            #Check that the hash of the block is correct
+            if block['previous_hash'] != set.hash(last_block):
+                return False
+
+            last_block = block
+            current_index += 1
+
+        return True
+
+    def resolve_conflicts(self):
+        """
+        This is our Consensus Algorithm, it resolves conflicts by replacing
+        our chain with the longest one in the network.
+
+        :return:<bool> True if our chain was replaced, False if not
+        """
+
+        neighbors = self.nodes
+        new_chain = None
+
+        #Check if new chain is longer than ours
+        max_length = len(self.chain)
+
+        #Grab and verify the chains from all of the nodes in our network
+        for node in neighbors:
+            response = r.get(f'http://{node}/chain')
+
+            length = response.json()[length]
+            chain = response.json()[chain]
+
+        #Replace our chain if one is longer
+            if length > max_length & self.valid_chain(chain):
+                max_length  = length
+                new_chain = chain
+
+        if new_chain:
+            self.chain = new_chain
+            return True
+
+        return False
 
 
